@@ -9,4 +9,16 @@
 
 
 ## 效果图
-![web主页](https://www.notion.so/wyf0931/Git-447c9239d115433db8768ed8a049dcd2?pvs=4#6faaa295b6b1498c959ba6cb6e12af4d)
+![web主页](./resource/web.png)
+
+## 安装
+1. 将Python版本切换到3.10x及以上；
+2. 在命令行中输入以下命令安装依赖：
+   ``` shell
+   pip install -r requirements.txt
+   ```
+3. 安装完成后，在命令行中输入：
+   ```shell
+   sh run.sh
+   ```
+4. 在浏览器打开：`http://127.0.0.1:8000` 即可看到主页。
