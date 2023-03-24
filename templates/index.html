@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	<meta charset="UTF-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<title>图片处理大师</title>
+        <link rel="stylesheet" href="./static/css/bootstrap.min.css">
+        <script src="./static/js/jquery.slim.min.js"></script>
+        <script src="./static/js/popper.min.js"></script>
+        <script src="./static/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class='container-xl'>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="nav nav-pills nav-fill">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="#">图像压缩（JPG）</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#">JPG转PNG</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#">九宫格切图</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link  href="#"">证件照</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link href="#"">微信表情</a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+            <div class="row" style="margin-top:15px;">
+                <div class="col-4 col-xl-4">
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-12 col-xl-12" style="padding-right: 0px;">
+                            <h5 class="card-header">原图编辑区</h5>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col">
+                            <form id="img-form">
+                                
+                                <div class="form-group row">
+                                    <label for="quality" class="col-3 col-xl-4">图像质量：<span id="quality-value">50</span></label> 
+                                    <input type="range" id="quality" name="quality" min="0" max="100" value="50" required 
+                                        class="form-control-range col-9 col-xl-8" 
+                                        oninput="document.querySelector('#quality-value').textContent = this.value;">
+                                    
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <label for="height" class="col-3 col-xl-4">图像高度（px）:</label>
+                                    <input type="number" id="height" name="height" min="0" value="0" class="form-control col-9 col-xl-8" required >
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <label for="width" class="col-3 col-xl-4">图像宽度（px）:</label>
+                                    <input type="number" id="width" name="width" min="0" value="0" class="form-control col-9 col-xl-8" required >
+                                </div>
+    
+                                <div class="form-group row">
+                                    <div class="col-3 col-xl-4">上传图片：</div>
+                                    <div class="col-9 col-xl-8" style="padding-right: 0px;padding-left:0px;">
+                                        <div class="custom-file">
+                                            <input type="file" id="file" name="file" accept=".jpeg,.jpg" class="custom-file-input">
+                                            <label for="file" class="custom-file-label" data-browse="上传图片">选择jpg图片</label>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="form-group row">
+                                    <label for="progress" class="col-3 col-xl-4">上传进度:</label>
+                                    <div class="progress col-9 col-xl-8" style=" padding-left: 0px; padding-right: 0px; ">
+                                        <div id="progress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                            role="progressbar" style="width:0%;" aria-valuemin="0" aria-valuemax="100">
+                                            <span id="progress-percent">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <input type="submit" value="提交" class="btn btn-primary btn-block" style="margin-left:15px;">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-8">
+                        <div class="row" style="margin-top:15px;">
+                            <div class="col-12 col-xl-12">
+                                <h5 class="card-header">新图预览区</h5>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:15px;">
+                            <div class='col-4 col-xl-4'>
+                                <label for="size">压缩前：</label><span id="size">0 KB</span>
+                            </div>
+                            <div class='col-4 col-xl-4'>
+                                <label for="compressed-size">压缩后：</label><span id="compressed-size">0 KB</span>
+                            </div>
+                            <div class='col-4 col-xl-4'>
+                                <label for="compressed-percent">压缩比例：</label><span id="compressed-percent">0%</span>
+                            </div>
+                        </div>
+    
+                        <div class="row">
+                            <div class="col">
+                                <img id="preview-img" src="" alt="预览图像" style="max-width:730px;">
+                            </div>
+                        </div>
+                        
+                    </div>
+            </div>
+        </div>
+        
+        
+        <script>
+            const form = document.querySelector('#img-form');
+            const previewImg = document.querySelector('#preview-img');
+            previewImg.style.display = 'none';
+        
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData();
+                formData.append('quality', document.querySelector('#quality').value);
+                formData.append('height', document.querySelector('#height').value);
+                formData.append('width', document.querySelector('#width').value);
+                formData.append('file', document.querySelector('#file').files[0]);
+                
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/img/resize');
+                xhr.upload.addEventListener('progress', function(event) {
+                    if (event.lengthComputable) {
+                        const percentComplete = event.loaded / event.total * 100;
+                        console.log(percentComplete.toFixed(2) + '%');
+                        document.querySelector('#progress').setAttribute('aria-valuenow', percentComplete);
+                        document.querySelector('#progress').setAttribute('style', 'width:'+ percentComplete+'%');
+                        document.querySelector('#progress-percent').textContent = percentComplete.toFixed(2) + '%';
+    
+                    }
+                });
+                xhr.onload = function() {
+                    const response = JSON.parse(xhr.responseText);
+                    const imageData = response.image;
+                    previewImg.src = 'data:image/png;base64,' + imageData;
+                    previewImg.style.display = 'block';
+                    
+                    // 原图大小
+                    const fileSize = document.querySelector('#file').files[0].size;
+                    const fileSizeInKB = fileSize / 1024;
+                    document.querySelector('#size').textContent = fileSizeInKB.toFixed(2) + ' KB';
+    
+                    // 压缩后图像大小
+                    const compressedFileSize = imageData.length / 1024;
+                    document.querySelector('#compressed-size').textContent = compressedFileSize.toFixed(2) + ' KB';
+    
+                    const compressedPercent = (1-imageData.length/fileSize) * 100;
+                    document.querySelector('#compressed-percent').textContent = compressedPercent.toFixed(2) + '%';
+                    
+                };
+    
+                xhr.responseType = 'text';
+                xhr.send(formData);
+           });
+    
+    
+            $(function () {
+              $('[data-toggle="tooltip"]').tooltip()
+            })
+        </script>
+    
+    </body>
+</html>
